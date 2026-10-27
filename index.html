@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1B2B5B">
+<title>Kirim Pesan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F7; --panel:#FFFFFF; --ink:#16202C; --muted:#5E6B7A; --line:#E2E6EC; --soft:#EEF1F6;
+  --navy:#1B2B5B; --on-navy:#FFFFFF; --gold:#8A5600; --gold-bg:#FFF0CC;
+  --danger:#B3372A; --danger-bg:#FBE9E6; --shadow:rgba(20,30,50,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E141D; --panel:#151D29; --ink:#E8EDF3; --muted:#98A5B5; --line:#243041; --soft:#1C2635;
+    --navy:#8FA6F5; --on-navy:#0B1020; --gold:#F0B94A; --gold-bg:#2E2610;
+    --danger:#F08A7A; --danger-bg:#34201D; --shadow:rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:14px;height:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+
+.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top>div{max-width:1040px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--navy);color:var(--on-navy);display:grid;place-items:center}
+.logo .i{width:16px;height:16px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:0 14px;height:38px;font-weight:500;cursor:pointer;background:var(--soft);white-space:nowrap}
+.btn:hover{filter:brightness(.97)}
+.btn.primary{background:var(--navy);color:var(--on-navy);font-weight:700;height:44px;width:100%}
+.btn.primary:disabled{opacity:.55;cursor:progress}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.danger{background:var(--danger-bg);color:var(--danger);font-weight:700}
+.btn.danger:disabled{opacity:.55;cursor:progress}
+.btn.icon{width:32px;height:32px;padding:0}
+.dot{display:none;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-left:-2px}
+.on .dot{display:inline-block}
+
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 56px;display:grid;gap:20px}
+@media(min-width:900px){.wrap{grid-template-columns:380px minmax(0,1fr);align-items:start}.compose{position:sticky;top:76px}}
+
+.compose{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.compose.over{border-color:var(--navy);box-shadow:0 0 0 3px var(--soft)}
+form{display:grid;gap:10px}
+.field{width:100%;border:0;background:var(--soft);border-radius:10px;padding:0 12px;height:38px}
+textarea.field{height:auto;min-height:88px;max-height:220px;padding:10px 12px;resize:none;line-height:1.5}
+.field::placeholder{color:var(--muted)}
+
+.chip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 6px}
+.chip[hidden]{display:none}
+.thumb{width:40px;height:40px;border-radius:8px;background:var(--soft);display:grid;place-items:center;overflow:hidden;color:var(--muted);flex:none}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.chip .info{min-width:0;flex:1;font-size:13.5px;line-height:1.3}
+.chip .info b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .info span{color:var(--muted);font-size:12.5px}
+
+.tools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.attach{position:relative}
+.attach input{position:absolute;opacity:0;width:1px;height:1px}
+.attach:focus-within{outline:2px solid var(--navy);outline-offset:2px}
+.switch{position:relative;display:inline-flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.track{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+.track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked+.track{background:var(--navy)}
+.switch input:checked+.track::after{transform:translateX(14px)}
+.switch input:focus-visible+.track{outline:2px solid var(--navy);outline-offset:2px}
+.switch.off{opacity:.45;cursor:not-allowed}
+
+.seg{border:0;margin:0;padding:0;min-width:0}
+.seg legend{font-size:12.5px;color:var(--muted);padding:0;margin-bottom:5px}
+.seg .opts{display:grid;grid-template-columns:repeat(4,1fr);background:var(--soft);border-radius:10px;padding:3px;gap:2px}
+.seg label{position:relative;display:block}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.seg span{display:block;text-align:center;padding:6px 2px;border-radius:8px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.seg input:checked+span{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px var(--shadow)}
+.seg input:focus-visible+span{outline:2px solid var(--navy);outline-offset:1px}
+progress{width:100%;height:6px;border:0;border-radius:6px;overflow:hidden;accent-color:var(--navy)}
+progress[hidden]{display:none}
+.hint{margin:10px 2px 0;font-size:12.5px;color:var(--muted)}
+
+.feed{min-width:0}
+.feedhead{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 10px}
+.feedhead h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:14px 16px}
+.row+.row{border-top:1px solid var(--line)}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+.head{display:flex;align-items:center;gap:8px;min-height:22px;flex-wrap:wrap}
+.name{font-weight:700;font-size:14.5px}
+.when{color:var(--muted);font-size:12.5px}
+.sp{flex:1}
+@media(max-width:520px){.sp{display:none}.head .icon{margin-left:auto}}
+.life{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.meter{display:block;width:34px;height:4px;border-radius:4px;background:var(--soft);overflow:hidden}
+.meter b{display:block;height:100%;background:var(--navy);border-radius:4px}
+.life.soon{color:var(--danger)}
+.life.soon .meter b{background:var(--danger)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--gold);background:var(--gold-bg);border-radius:6px;padding:1px 7px}
+.text{margin:3px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+.text.clamp{display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.acts{display:flex;gap:2px;margin:3px 0 0 -6px}
+.act{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:var(--muted);font-size:12.5px;font-weight:500;padding:3px 7px;border-radius:6px;cursor:pointer}
+.act:hover{background:var(--soft);color:var(--ink)}
+.act.ok{color:var(--navy)}
+.media{margin-top:8px}
+.media img,.media video{display:block;max-width:100%;max-height:300px;border-radius:10px;background:#000}
+.media audio{width:100%}
+.file{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:inherit;max-width:420px}
+.file:hover{background:var(--soft)}
+.file .ic{width:34px;height:34px;border-radius:8px;background:var(--soft);display:grid;place-items:center;color:var(--navy);flex:none}
+.file .t{min-width:0;font-size:13.5px;line-height:1.3}
+.file .t b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .t span{color:var(--muted);font-size:12.5px}
+.gone{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px}
+.empty{padding:36px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+#more{margin:12px auto 0;display:flex}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(420px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(10,16,28,.55)}
+.dh{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 12px 16px;border-bottom:1px solid var(--line);font-weight:700}
+.db{padding:16px;display:grid;gap:12px}
+.db[hidden],#tools[hidden]{display:none}
+#tools{display:grid;gap:12px}
+.db label.l{font-size:12.5px;color:var(--muted);display:block;margin-bottom:5px}
+.db select.field{padding:0 10px}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;cursor:pointer}
+.chk input{margin-top:3px;accent-color:var(--navy)}
+.chk small{display:block;color:var(--muted);font-size:12.5px}
+.msg{font-size:13px;min-height:1.2em;color:var(--muted)}
+.msg.err{color:var(--danger)}
+.rowf{display:flex;gap:8px}
+.rowf .field{flex:1}
+
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .15s;max-width:calc(100vw - 32px);z-index:20}
+#toast.show{opacity:1}
+#toast.err{background:var(--danger);color:#fff}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+</svg>
+
+<header class="top">
+  <div>
+    <div class="brand"><span class="logo"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg></span>Kirim Pesan</div>
+    <button class="btn ghost" id="adminBtn" type="button"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg>Admin<span class="dot"></span></button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="compose" id="compose" aria-label="Tulis pesan">
+    <form id="form">
+      <input class="field" id="name" type="text" maxlength="60" placeholder="Nama (boleh kosong)" autocomplete="name" aria-label="Nama">
+      <textarea class="field" id="text" rows="3" placeholder="Tulis pesan di sini" aria-label="Pesan"></textarea>
+
+      <div class="chip" id="chip" hidden>
+        <div class="thumb" id="thumb"></div>
+        <div class="info"><b id="cname"></b><span id="csize"></span></div>
+        <button class="btn ghost icon" type="button" id="clear" aria-label="Lepas lampiran"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </div>
+
+      <div class="tools">
+        <label class="btn attach">
+          <svg class="i" aria-hidden="true"><use href="#i-clip"/></svg>Lampiran
+          <input id="file" type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip">
+        </label>
+        <label class="switch off" id="onceBox">
+          <input type="checkbox" id="once" disabled>
+          <span class="track"></span><span>Sekali unduh</span>
+        </label>
+      </div>
+
+      <fieldset class="seg">
+        <legend>Simpan selama</legend>
+        <div class="opts">
+          <label><input type="radio" name="ttl" value="1"><span>1 hari</span></label>
+          <label><input type="radio" name="ttl" value="7" checked><span>7 hari</span></label>
+          <label><input type="radio" name="ttl" value="30"><span>30 hari</span></label>
+          <label><input type="radio" name="ttl" value="0"><span>Selamanya</span></label>
+        </div>
+      </fieldset>
+
+      <progress id="bar" max="100" value="0" hidden></progress>
+      <button class="btn primary" id="send" type="submit"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg>Kirim</button>
+    </form>
+    <p class="hint">Gambar, video, atau dokumen. Maksimal 20 MB. Bisa juga tempel atau seret file ke sini.</p>
+  </section>
+
+  <section class="feed" aria-label="Pesan terkirim">
+    <div class="feedhead"><h2>Pesan terkirim</h2></div>
+    <div class="list" id="list"></div>
+    <button class="btn ghost" id="more" type="button" hidden>Muat lebih banyak</button>
+  </section>
+</main>
+
+<dialog id="dlg" aria-labelledby="dtitle">
+  <div class="dh"><span id="dtitle">Admin</span><button class="btn ghost icon" type="button" id="dclose" aria-label="Tutup"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="db">
+    <div id="loginRow" class="rowf">
+      <input class="field" id="key" type="password" placeholder="Kunci admin" autocomplete="current-password" aria-label="Kunci admin">
+      <button class="btn primary" style="width:auto;height:38px" id="login" type="button">Masuk</button>
+    </div>
+    <div id="tools" hidden>
+      <div>
+        <label class="l" for="cdays">Hapus file yang lebih lama dari</label>
+        <select class="field" id="cdays"><option value="7">7 hari</option><option value="30" selected>30 hari</option><option value="90">90 hari</option></select>
+      </div>
+      <label class="chk"><input type="checkbox" id="callmsg"><span>Hapus juga teks pesannya<small>Jika tidak dicentang, teks tetap ada dan hanya file yang dihapus.</small></span></label>
+      <button class="btn danger" id="cleanup" type="button"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Hapus file lama</button>
+      <div class="msg" id="cstatus" role="status" aria-live="polite"></div>
+      <button class="btn ghost" id="logout" type="button">Keluar dari admin</button>
+    </div>
+    <div class="msg" id="astatus" role="status" aria-live="polite"></div>
+  </div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const MAX = 20 * 1024 * 1024;
+const $ = (id) => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+let cursor = null, picked = null, previewURL = null, adminKey = "", tt;
+try { adminKey = sessionStorage.getItem("adminKey") || ""; } catch {}
+try { $("name").value = localStorage.getItem("nama") || ""; } catch {}
+
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+function ico(name, small) { const s = document.createElementNS(NS, "svg"); s.setAttribute("class", "i" + (small ? " sm" : "")); s.setAttribute("aria-hidden", "true"); const u = document.createElementNS(NS, "use"); u.setAttribute("href", "#i-" + name); s.appendChild(u); return s; }
+const fmtSize = (n) => n > 1048576 ? (n / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+const fmtDate = (t) => new Date(t).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+function ago(t) {
+  const s = (Date.now() - t) / 1000;
+  if (s < 60) return "baru saja";
+  if (s < 3600) return Math.floor(s / 60) + " menit lalu";
+  if (s < 86400) return Math.floor(s / 3600) + " jam lalu";
+  return new Date(t).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+}
+function left(ms) {
+  if (ms <= 0) return "kedaluwarsa";
+  if (ms >= 2 * 86400000) return Math.round(ms / 86400000) + " hari lagi";
+  if (ms >= 3600000) return Math.round(ms / 3600000) + " jam lagi";
+  return "sebentar lagi";
+}
+function toast(msg, err) { const t = $("toast"); t.textContent = msg; t.className = "show" + (err ? " err" : ""); clearTimeout(tt); tt = setTimeout(() => t.className = "", 3500); }
+function setMsg(id, msg, err) { const s = $(id); s.textContent = msg || ""; s.className = "msg" + (err ? " err" : ""); }
+
+// ---- Komposer ----
+const ta = $("text");
+ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 220) + "px"; });
+
+function setFile(f) {
+  if (previewURL) { URL.revokeObjectURL(previewURL); previewURL = null; }
+  if (f && f.size > MAX) { toast("File terlalu besar. Maksimal 20 MB.", true); $("file").value = ""; f = null; }
+  picked = f || null;
+  $("chip").hidden = !picked;
+  $("once").disabled = !picked; $("onceBox").classList.toggle("off", !picked);
+  if (!picked) { $("once").checked = false; return; }
+  $("cname").textContent = picked.name; $("csize").textContent = fmtSize(picked.size);
+  const th = $("thumb"); th.textContent = "";
+  if (/^image\//.test(picked.type) && !/svg/.test(picked.type)) {
+    previewURL = URL.createObjectURL(picked);
+    const im = document.createElement("img"); im.src = previewURL; im.alt = ""; th.appendChild(im);
+  } else th.appendChild(ico(/^video\//.test(picked.type) ? "play" : "file"));
+}
+$("file").addEventListener("change", () => setFile($("file").files[0]));
+$("clear").addEventListener("click", () => { $("file").value = ""; setFile(null); });
+
+const box = $("compose");
+["dragenter", "dragover"].forEach(e => box.addEventListener(e, ev => { ev.preventDefault(); box.classList.add("over"); }));
+["dragleave", "drop"].forEach(e => box.addEventListener(e, ev => { ev.preventDefault(); box.classList.remove("over"); }));
+box.addEventListener("drop", ev => { const f = ev.dataTransfer.files[0]; if (f) { try { $("file").files = ev.dataTransfer.files; } catch {} setFile(f); } });
+ta.addEventListener("paste", ev => { const f = ev.clipboardData && ev.clipboardData.files[0]; if (f) { ev.preventDefault(); setFile(f); } });
+
+// ---- Daftar pesan ----
+const pending = [];
+function fitClamps() { requestAnimationFrame(() => { while (pending.length) pending.shift()(); }); }
+async function copyText(t) {
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); return; } } catch {}
+  const a = document.createElement("textarea"); a.value = t; a.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+  document.body.appendChild(a); a.select();
+  const ok = document.execCommand("copy"); a.remove();
+  if (!ok) throw new Error("copy");
+}
+function avatar(name) {
+  const d = el("div", "av", (name.trim()[0] || "?").toUpperCase());
+  const h = [...name].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+  d.style.background = `hsl(${Math.abs(h) % 360} 42% 38%)`;
+  return d;
+}
+function life(m) {
+  const s = el("span", "life"); s.appendChild(ico("clock", true));
+  if (!m.expiresAt) { s.append("Tanpa batas"); return s; }
+  const total = m.expiresAt - m.createdAt, rem = m.expiresAt - Date.now();
+  s.append(left(rem));
+  const mt = el("i", "meter"), b = document.createElement("b");
+  b.style.width = Math.round(Math.max(0, Math.min(1, rem / total)) * 100) + "%";
+  mt.appendChild(b); s.appendChild(mt);
+  if (rem < 86400000) s.classList.add("soon");
+  s.title = "Dihapus otomatis " + fmtDate(m.expiresAt);
+  return s;
+}
+function goneBox(text) { const g = el("div", "gone"); g.appendChild(ico("trash", true)); g.append(text); return g; }
+function fileLink(m, href, label, sub, icon, attrs) {
+  const a = el("a", "file"); a.href = href;
+  Object.entries(attrs || {}).forEach(([k, v]) => a.setAttribute(k, v));
+  const ic = el("span", "ic"); ic.appendChild(ico(icon)); a.appendChild(ic);
+  const t = el("span", "t"); t.append(el("b", "", label), el("span", "", sub)); a.appendChild(t);
+  return a;
+}
+
+function render(m) {
+  const row = el("article", "row");
+  row.appendChild(avatar(m.name));
+  const body = el("div"); row.appendChild(body);
+
+  const head = el("div", "head");
+  const when = el("span", "when", ago(m.createdAt)); when.title = fmtDate(m.createdAt);
+  head.append(el("span", "name", m.name), when, el("span", "sp"));
+  if (m.oneTime && m.file && !m.file.gone) { const tg = el("span", "tag"); tg.appendChild(ico("lock", true)); tg.append("Sekali unduh"); head.appendChild(tg); }
+  head.appendChild(life(m));
+  if (adminKey) {
+    const del = el("button", "btn ghost icon"); del.type = "button"; del.setAttribute("aria-label", "Hapus pesan ini"); del.appendChild(ico("trash", true));
+    del.addEventListener("click", async () => {
+      if (!confirm("Hapus pesan ini beserta filenya?")) return;
+      const r = await fetch("/api/messages?key=" + encodeURIComponent(m.key), { method: "DELETE", headers: { "x-admin-key": adminKey } });
+      if (r.ok) { row.remove(); toast("Pesan dihapus."); } else toast((await r.json().catch(() => ({}))).error || "Gagal menghapus.", true);
+    });
+    head.appendChild(del);
+  }
+  body.appendChild(head);
+  if (m.text) {
+    const p = el("p", "text clamp", m.text); body.appendChild(p);
+    let full = m.truncated ? null : m.text, open = false;
+    const getFull = async () => {
+      if (full !== null) return full;
+      const r = await fetch("/api/messages?key=" + encodeURIComponent(m.key));
+      if (!r.ok) throw new Error("load");
+      full = (await r.json()).text; return full;
+    };
+    const acts = el("div", "acts");
+    const label = (b, icon, text) => { b.textContent = ""; b.append(ico(icon, true), text); };
+    const cp = el("button", "act"); cp.type = "button"; label(cp, "copy", "Salin teks");
+    const tg = el("button", "act", "Selengkapnya"); tg.type = "button"; tg.hidden = !m.truncated;
+    cp.addEventListener("click", async () => {
+      try {
+        await copyText(await getFull());
+        cp.classList.add("ok"); label(cp, "check", "Tersalin");
+        setTimeout(() => { cp.classList.remove("ok"); label(cp, "copy", "Salin teks"); }, 1800);
+      } catch { toast("Gagal menyalin teks.", true); }
+    });
+    tg.addEventListener("click", async () => {
+      try {
+        if (!open) { p.textContent = await getFull(); p.classList.remove("clamp"); tg.textContent = "Ringkas"; open = true; }
+        else { p.classList.add("clamp"); tg.textContent = "Selengkapnya"; open = false; }
+      } catch { toast("Gagal memuat teks lengkap.", true); }
+    });
+    acts.append(cp, tg); body.appendChild(acts);
+    pending.push(() => { tg.hidden = !m.truncated && p.scrollHeight <= p.clientHeight + 1; });
+  }
+
+  if (m.file) {
+    const f = m.file, t = f.type;
+    if (f.gone) {
+      body.appendChild(goneBox((f.reason === "cleanup" ? "Dihapus admin: " : "Sudah diunduh dan dihapus: ") + f.name));
+    } else if (m.oneTime) {
+      const a = fileLink(m, f.url + "?dl=1", "Unduh " + f.name, fmtSize(f.size) + ", hanya bisa diunduh satu kali", "down", { download: f.name });
+      a.addEventListener("click", () => setTimeout(() => a.replaceWith(goneBox("Sudah diunduh dan dihapus: " + f.name)), 2000));
+      body.appendChild(a);
+    } else if (/^image\//.test(t) && !/svg/.test(t)) {
+      const md = el("div", "media"), a = el("a"); a.href = f.url; a.target = "_blank"; a.rel = "noopener";
+      const i = document.createElement("img"); i.src = f.url; i.loading = "lazy"; i.alt = f.name; a.appendChild(i); md.appendChild(a); body.appendChild(md);
+    } else if (/^video\//.test(t)) {
+      const md = el("div", "media"), v = document.createElement("video"); v.src = f.url; v.controls = true; v.preload = "metadata"; v.playsInline = true; md.appendChild(v); body.appendChild(md);
+    } else if (/^audio\//.test(t)) {
+      const md = el("div", "media"), a = document.createElement("audio"); a.src = f.url; a.controls = true; md.appendChild(a); body.appendChild(md);
+    } else {
+      body.appendChild(fileLink(m, f.url, f.name, fmtSize(f.size) + ", ketuk untuk membuka", "file", { target: "_blank", rel: "noopener" }));
+    }
+  }
+  return row;
+}
+function emptyState() { const e = el("div", "empty"); e.append(el("b", "", "Belum ada pesan"), "Kirim pesan pertama lewat form di samping atau di atas."); return e; }
+
+async function load(more) {
+  const r = await fetch("/api/messages" + (more && cursor ? "?cursor=" + encodeURIComponent(cursor) : ""));
+  if (!r.ok) { $("list").textContent = ""; const e = el("div", "empty"); e.append(el("b", "", "Pesan belum bisa dimuat"), "Pastikan KV sudah dihubungkan ke project ini."); $("list").appendChild(e); return; }
+  const d = await r.json(); cursor = d.cursor;
+  if (!more) $("list").textContent = "";
+  d.items.forEach(m => $("list").appendChild(render(m))); fitClamps();
+  if (!more && !d.items.length) $("list").appendChild(emptyState());
+  $("more").hidden = !cursor;
+}
+$("more").addEventListener("click", () => load(true));
+
+// ---- Kirim ----
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = ta.value.trim();
+  if (!text && !picked) { toast("Tulis pesan atau pilih file dulu.", true); return; }
+  try { localStorage.setItem("nama", $("name").value); } catch {}
+  const fd = new FormData();
+  fd.append("name", $("name").value); fd.append("text", text);
+  fd.append("ttl", document.querySelector('input[name="ttl"]:checked').value);
+  if (picked) { fd.append("file", picked); fd.append("oneTime", $("once").checked ? "1" : "0"); }
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "/api/messages");
+  $("send").disabled = true; $("bar").hidden = !picked; $("bar").value = 0;
+  xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) $("bar").value = ev.loaded / ev.total * 100; };
+  xhr.onload = () => {
+    $("send").disabled = false; $("bar").hidden = true;
+    let d = {}; try { d = JSON.parse(xhr.responseText); } catch {}
+    if (xhr.status === 201) {
+      ta.value = ""; ta.style.height = ""; $("file").value = ""; setFile(null); toast("Terkirim.");
+      const em = $("list").querySelector(".empty"); if (em) em.remove();
+      $("list").prepend(render(d.item)); fitClamps();
+    } else toast(d.error || "Gagal mengirim. Coba lagi.", true);
+  };
+  xhr.onerror = () => { $("send").disabled = false; $("bar").hidden = true; toast("Koneksi terputus. Coba lagi.", true); };
+  xhr.send(fd);
+});
+
+// ---- Admin ----
+const dlg = $("dlg");
+function showAdmin(on) {
+  $("loginRow").hidden = on; $("tools").hidden = !on;
+  $("adminBtn").classList.toggle("on", on);
+}
+$("adminBtn").addEventListener("click", () => { dlg.showModal(); if (!adminKey) $("key").focus(); });
+$("dclose").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+async function login() {
+  const k = $("key").value || adminKey;
+  setMsg("astatus", "");
+  const r = await fetch("/api/cleanup?check=1", { method: "POST", headers: { "x-admin-key": k } });
+  if (!r.ok) { setMsg("astatus", "Kunci admin salah.", true); return; }
+  adminKey = k; try { sessionStorage.setItem("adminKey", k); } catch {}
+  $("key").value = ""; showAdmin(true); load(false);
+}
+$("login").addEventListener("click", login);
+$("key").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); login(); } });
+$("logout").addEventListener("click", () => { adminKey = ""; try { sessionStorage.removeItem("adminKey"); } catch {} showAdmin(false); dlg.close(); load(false); });
+
+$("cleanup").addEventListener("click", async () => {
+  const days = $("cdays").value, all = $("callmsg").checked;
+  if (!confirm(`Hapus ${all ? "pesan dan file" : "file"} yang lebih lama dari ${days} hari? Ini tidak bisa dibatalkan.`)) return;
+  $("cleanup").disabled = true; setMsg("cstatus", "Memproses...");
+  let cur = "", files = 0, msgs = 0;
+  try {
+    for (;;) {
+      const q = new URLSearchParams({ days, scope: all ? "all" : "files" }); if (cur) q.set("cursor", cur);
+      const r = await fetch("/api/cleanup?" + q, { method: "POST", headers: { "x-admin-key": adminKey } });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setMsg("cstatus", d.error || "Gagal membersihkan.", true); break; }
+      files += d.filesDeleted; msgs += d.msgsDeleted;
+      setMsg("cstatus", `Memproses... ${files} file dihapus`);
+      if (d.done) { setMsg("cstatus", `Selesai: ${files} file${all ? " dan " + msgs + " pesan" : ""} dihapus.`); load(false); break; }
+      cur = d.cursor;
+    }
+  } catch { setMsg("cstatus", "Koneksi terputus. Jalankan lagi untuk melanjutkan.", true); }
+  $("cleanup").disabled = false;
+});
+
+showAdmin(!!adminKey);
+load(false);
+</script>
+</body>
+</html>
